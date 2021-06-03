@@ -203,10 +203,6 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 /// Asset data returned by <code>TPCSDK.getCardAsset(...)</code>
 SWIFT_CLASS("_TtC11TPCSDKSwift9CardAsset")
 @interface CardAsset : NSObject
-/// Type of asset
-@property (nonatomic, copy) NSString * _Nullable type;
-/// Base64 encoded data
-@property (nonatomic, copy) NSString * _Nullable data;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -246,14 +242,6 @@ SWIFT_CLASS("_TtC11TPCSDKSwift22CardDigitizationResult")
 /// Card list returned by <code>TPCSDK.getCardList(...)</code>
 SWIFT_CLASS("_TtC11TPCSDKSwift8CardList")
 @interface CardList : NSObject
-/// Card ID
-@property (nonatomic, copy) NSString * _Nullable id;
-/// Card state
-@property (nonatomic, copy) NSString * _Nullable state;
-/// Card number suffix
-@property (nonatomic, copy) NSString * _Nullable suffix;
-/// Card expiry date
-@property (nonatomic, copy) NSString * _Nullable expiryDate;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -295,6 +283,26 @@ typedef SWIFT_ENUM(NSInteger, CardScheme, open) {
 /// \endcode
 SWIFT_CLASS("_TtC11TPCSDKSwift11FundingCard")
 @interface FundingCard : NSObject
+/// Constructor for FundingCard using Scheme and Encrypted Payload, or using Primary Account Identifier
+/// note:
+/// Initialize <code>FundingCard</code> with <code>CardScheme</code> and Encrypted Payload
+/// \code
+/// let card = FundingCard(scheme, cardPayload)
+///
+/// \endcode\param scheme <code>CardScheme</code>
+///
+/// \param encryptedPayload Card information encrypted in PKCS7
+///
+- (nonnull instancetype)initWithScheme:(enum CardScheme)scheme encryptedPayload:(NSString * _Nullable)encryptedPayload OBJC_DESIGNATED_INITIALIZER;
+/// Constructor for FundingCard using Scheme and Encrypted Payload, or using Primary Account Identifier
+/// note:
+/// Initialize <code>FundingCard</code> with Primary Account Identifier
+/// \code
+/// let card = FundingCard(cardIdentifier)
+///
+/// \endcode\param primaryAccountIdentifier Primary Account Identifier of the payment card
+///
+- (nonnull instancetype)initWithPrimaryAccountIdentifier:(NSString * _Nullable)primaryAccountIdentifier OBJC_DESIGNATED_INITIALIZER;
 /// Card information encrypted in PKCS7 using TIG TSH Certificate
 @property (nonatomic, copy) NSString * _Nullable encryptedPayload;
 /// Primary Account Identifier of the payment card
@@ -324,6 +332,13 @@ SWIFT_CLASS("_TtC11TPCSDKSwift21PendingActivationPass")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+/// Push method
+SWIFT_CLASS("_TtC11TPCSDKSwift10PushMethod")
+@interface PushMethod : NSObject
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
 /// SDK configuration result
 typedef SWIFT_ENUM(NSInteger, SdkConfigureResult, open) {
 /// SDK is configured for TPCSDK Push Provisioning
@@ -347,13 +362,14 @@ typedef SWIFT_ENUM(NSInteger, SdkVariant, open) {
 @class Token;
 @class TokenRequestorAsset;
 enum TokenState : NSInteger;
+@class TokenRequestor;
 
 /// TPCSDK for iOS
 SWIFT_CLASS("_TtC11TPCSDKSwift6TPCSDK")
 @interface TPCSDK : NSObject
 /// This is the version of the TPCSDK
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nullable tpcsdkVersion;)
-+ (NSString * _Nullable)tpcsdkVersion SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull tpcsdkVersion;)
++ (NSString * _Nonnull)tpcsdkVersion SWIFT_WARN_UNUSED_RESULT;
 /// Reset SDK
 + (void)reset;
 /// Configure SDK with <code>SdkVariant</code>  and Issuer ID.
@@ -363,11 +379,24 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 /// func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 ///   // Override point for customization after application launch.
 ///
+///   let tpcVariant = SdkVariant.PROD
 ///   let tpcIssuerId = "TPC_ISSUER"
-///   TPCSDK.configure(variant: .PROD,
-///                    issuerId: tpcIssuerId)
+///   let result = TPCSDK.configure(variant: tpcVariant,
+///                                issuerId: tpcIssuerId)
 ///   
 ///   return true
+/// }
+///
+/// \endcode\code
+/// - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+///   // Override point for [customization after application launch.
+///   
+///   SdkVariant tpcVariant = SdkVariantPROD;
+///   NSString * tpcIssuerId = @"TPC_ISSUER";
+///   SdkConfigureResult result = [TPCSDK configureWithVariant:tpcVariant
+///                                                   issuerId:tpcIssuerId];
+///
+///   return YES;
 /// }
 ///
 /// \endcode\param variant Use SdkVariant.PPROD for Pre-Production server and SdkVariant.PROD for Production server.
@@ -385,12 +414,24 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 /// func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 ///   // Override point for customization after application launch.
 ///
-///   let tpcServerUrl = "https://hapi.dbp.thalescloud.io"
+///   let tpcServerUrl = "https://hapi.dbp.thalescloud.io/mg/tpc"
 ///   let tpcIssuerId  = "TPC_ISSUER"
-///   TPCSDK.configure(variant: tpcServerUrl,
-///                    issuerId: tpcIssuerId)
+///   let result = TPCSDK.configure(url: tpcServerUrl,
+///                                 issuerId: tpcIssuerId)
 ///   
 ///   return true
+/// }
+///
+/// \endcode\code
+/// - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+///   // Override point for [customization after application launch.
+///   
+///   NSString * tpcServerUrl = @"https://hapi.dbp.thalescloud.io/mg/tpc";
+///   NSString * tpcIssuerId = @"TPC_ISSUER";
+///   SdkConfigureResult result = [TPCSDK configureWithUrl:tpcServerUrl
+///                                               issuerId:tpcIssuerId];
+///
+///   return YES;
 /// }
 ///
 /// \endcode\param url Provide server URL without trailing slash (example: https://hapi.dbp.thalescloud.io).
@@ -420,6 +461,21 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///   }
 /// }
 ///
+/// \endcode\code
+/// [TPCSDK isCardDigitizedWithCard:card
+///        primaryAccountIdentifier:NULL
+///                      completion:^(NSString * _Nullable primaryAccountIdentifier,
+///                                   enum IsCardDigitizedResult digitizeResult) {
+///   switch(digitizeResult) {
+///     case IsCardDigitizedResultCardNotDigitized:
+///       // TODO: Display Add to Apple Wallet button
+///       break;
+///       
+///     default:
+///       break;
+///   }
+/// }];
+///
 /// \endcodenote:
 /// Using <code>FundingCard</code> object initialized with Primary Account Identifier
 /// \code
@@ -433,6 +489,21 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///   default: break
 ///   }
 /// }
+///
+/// \endcode\code
+/// [TPCSDK isCardDigitizedWithCard:card
+///        primaryAccountIdentifier:NULL
+///                      completion:^(NSString * _Nullable primaryAccountIdentifier,
+///                                   enum IsCardDigitizedResult digitizeResult) {
+///   switch(digitizeResult) {
+///     case IsCardDigitizedResultCardNotDigitized:
+///       // TODO: Display Add to Apple Wallet button
+///       break;
+///       
+///     default:
+///       break;
+///   }
+/// }];
 ///
 /// \endcodenote:
 /// Using Primary Account Identifier
@@ -450,6 +521,22 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///   }
 /// }
 ///
+/// \endcode\code
+/// [TPCSDK isCardDigitizedWithCard:NULL
+///        primaryAccountIdentifier:cardIdentifier
+///                      completion:^(NSString * _Nullable primaryAccountIdentifier,
+///                                   enum IsCardDigitizedResult digitizeResult) {
+///   switch(digitizeResult) {
+///     case IsCardDigitizedResultCardNotDigitized:
+///       // TODO: Display Add to Apple Wallet button
+///       break;
+///       
+///     default:
+///       // TODO: Hide Add to Apple Wallet button
+///       break;
+///   }
+/// }];
+///
 /// \endcode\param card <code>FundingCard</code> object initialized with <code>CardScheme</code> and Encrypted Payload, or <code>FundingCard</code> object initialized with Primary Account Identifier
 ///
 /// \param primaryAccountIdentifier Primary Account Identifier of the payment card
@@ -462,22 +549,45 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 /// Using <code>FundingCard</code> object initialized with <code>CardScheme</code> and Encrypted Payload
 /// \code
 /// TPCSDK.getCardDigitizationResult(card: card) {
-///   (digitizeDetails) in
+///   (primaryAccountIdentifier, digitizeDetails) in
 /// }
+///
+/// \endcode\code
+/// [TPCSDK getCardDigitizationResultWithCard:card
+///                  primaryAccountIdentifier:NULL
+///                                completion:^(NSString * _Nullable primaryAccountIdentifier,
+///                                             CardDigitizationResult * _Nonnull digitizeDetails) {
+///   
+/// }];
 ///
 /// \endcodenote:
 /// Using <code>FundingCard</code> object initialized with Primary Account Identifier
 /// \code
 /// TPCSDK.getCardDigitizationResult(card: card) {
-///   (digitizeDetails) in
+///   (primaryAccountIdentifier, digitizeDetails) in
 /// }
+///
+/// \endcode\code
+/// [TPCSDK getCardDigitizationResultWithCard:card
+///                  primaryAccountIdentifier:NULL
+///                                completion:^(NSString * _Nullable primaryAccountIdentifier,
+///                                             CardDigitizationResult * _Nonnull digitizeDetails) {
+///   
+/// }];
 ///
 /// \endcodenote:
 /// Using Primary Account Identifier
 /// \code
 /// TPCSDK.getCardDigitizationResult(primaryAccountIdentifier: cardIdentifier) {
-///   (digitizeDetails) in
+///   (primaryAccountIdentifier, digitizeDetails) in
 /// }
+///
+/// \endcode\code
+/// [TPCSDK getCardDigitizationResultWithCard:NULL
+///                  primaryAccountIdentifier:cardIdentifier
+///                                completion:^(NSString * _Nullable primaryAccountIdentifier,
+///                                             CardDigitizationResult * _Nonnull digitizeResult) {
+/// }];
 ///
 /// \endcode\param card <code>FundingCard</code> object initialized with <code>CardScheme</code> and Encrypted Payload, or <code>FundingCard</code> object initialized with Primary Account Identifier
 ///
@@ -495,6 +605,15 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///                  encryptedPayload: "PKCS7 encrypted PAN",
 ///                  authorizationCode: "code",
 ///                  provisionDelegate: self)
+///
+/// \endcode\code
+/// [TPCSDK provisionFromController:self
+///            primaryAccountSuffix:@"1234"
+///                  cardholderName:@"John Doe"
+///                          scheme:CardSchemeMastercard
+///                encryptedPayload:@"PKCS7 encrypted PAN"
+///               authorizationCode:@"code"
+///               provisionDelegate:self];
 ///
 /// \endcode\param fromController The calling UIViewController
 ///
@@ -519,6 +638,11 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///   (pendingActivationPass) in
 /// }
 ///
+/// \endcode\code
+/// [TPCSDK getPendingActivationPassWithCard:card
+///                               completion:^(PendingActivationPass * _Nullable pendingActivationPass) {
+/// }];
+///
 /// \endcode\param card See <code>FundingCard</code>
 ///
 /// \param pendingActivationPass See <code>PendingActivationPass</code>
@@ -534,6 +658,14 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///                     nonce: nonce) {
 ///   (success, error) in
 /// }
+///
+/// \endcode\code
+/// [TPCSDK activatePassWithPass:pass
+///                         card:card
+///            authorizationCode:code
+///                        nonce:nonce
+///                   completion:^(BOOL success, NSError * _Nullable error) {
+/// }];
 ///
 /// \endcode\param pass See <code>PassKit.PKPass</code>
 ///
@@ -556,6 +688,11 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///   (tokenList) in
 /// }
 ///
+/// \endcode\code
+/// [TPCSDK getTokensWithCard:card
+///                completion:^(NSArray<Token *> * _Nullable tokenList) {
+/// }];
+///
 /// \endcode\param card See <code>FundingCard</code>
 ///
 /// \param tokenList See <code>Token</code>
@@ -567,6 +704,11 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///   (tokenRequestorAsset) in
 /// }
 ///
+/// \endcode\code
+/// [TPCSDK getTokenRequestorAssetWithAssetId:id
+///                                completion:^(NSArray<TokenRequestorAsset *> * _Nullable tokenRequestorAsset) {
+/// }];
+///
 /// \endcode\param assetId See <code>Token.TokenRequestor.id</code>
 ///
 /// \param tokenRequestorAsset See <code>Asset</code>
@@ -575,20 +717,35 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 /// Update token state
 /// \code
 /// TPCSDK.updateTokenState(tokenId: tokenId,
+///                         tokenRequestorId: tokenRequestorId,
+///                         scheme: scheme
 ///                         authorizationCode: authorizationCode,
 ///                         action: .Suspend) {
 ///   (success) in
 /// }
 ///
+/// \endcode\code
+/// [TPCSDK updateTokenStateWithTokenId:tokenId
+///                    tokenRequestorId:tokenRequestorId
+///                              scheme:scheme
+///                   authorizationCode:code
+///                              action:state
+///                          completion:^(BOOL success) {
+/// }];
+///
 /// \endcode\param tokenId See <code>Token.id</code>
 ///
-/// \param authorizationCode AuthorizationCode
+/// \param tokenRequestorId Unique identifier of the token requestor allocated by the TSP Scheme. It shall be provided for VISA scheme.
+///
+/// \param scheme See <code>CardScheme</code>
+///
+/// \param authorizationCode Authorization code provided by issuer.
 ///
 /// \param action See <code>TokenState</code>
 ///
 /// \param success Result from update token state
 ///
-+ (void)updateTokenStateWithTokenId:(NSString * _Nonnull)tokenId authorizationCode:(NSString * _Nonnull)authorizationCode action:(enum TokenState)action completion:(void (^ _Nonnull)(BOOL))completion;
++ (void)updateTokenStateWithTokenId:(NSString * _Nonnull)tokenId tokenRequestorId:(NSString * _Nonnull)tokenRequestorId scheme:(enum CardScheme)scheme authorizationCode:(NSString * _Nonnull)authorizationCode action:(enum TokenState)action completion:(void (^ _Nonnull)(BOOL))completion;
 /// Get cards
 /// \code
 /// TPCSDK.getCards(userId: userId,
@@ -596,6 +753,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///                 kyc: kyc) {
 ///   (cards) in
 /// }
+///
+/// \endcode\code
+/// [TPCSDK getCardsWithUserId:userId
+///          authorizationCode:code
+///                        kyc:kyc
+///                 completion:^(NSArray<CardList *> * _Nullable cardList) {
+/// }];
 ///
 /// \endcode\param userId User ID
 ///
@@ -614,6 +778,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 ///   (cardAsset) in
 /// }
 ///
+/// \endcode\code
+/// [TPCSDK getCardAssetWithCardId:cardId
+///                            kyc:kyc
+///                           size:size
+///                     completion:^(NSArray<CardAsset *> * _Nullable cardAsset) {
+/// }];
+///
 /// \endcode\param cardId Card ID
 ///
 /// \param kyc KYC
@@ -625,7 +796,18 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 + (void)getCardAssetWithCardId:(NSString * _Nonnull)cardId kyc:(NSString * _Nonnull)kyc size:(enum CardAssetSize)size completion:(void (^ _Nonnull)(NSArray<CardAsset *> * _Nullable))completion;
 /// Request encrypted payload for a given funding card
 /// \code
+/// TPCSDK.getPayload(authorizationCode: code,
+///                   cardId: cardId,
+///                   kyc: kyc) {
+///   (payload) in
+/// }
 ///
+/// \endcode\code
+/// [TPCSDK getPayloadWithAuthorizationCode:code
+///                                  cardId:cardId
+///                                     kyc:kyc
+///                              completion:^(NSString * _Nullable encryptedPayload) {
+/// }];
 ///
 /// \endcode\param authorizationCode Authorization code
 ///
@@ -636,6 +818,66 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nu
 /// \param payload Card information encrypted in PKCS7
 ///
 + (void)getPayloadWithAuthorizationCode:(NSString * _Nonnull)authorizationCode cardId:(NSString * _Nonnull)cardId kyc:(NSString * _Nonnull)kyc completion:(void (^ _Nonnull)(NSString * _Nullable))completion;
+/// Request encrypted payload for a given funding card
+/// \code
+/// TPCSDK.getEligibleTokenRequestor(card: card,
+///                                  publicKeyIdentifier: publicKeyId) {
+///   (TokenRequestorList) in
+/// }
+///
+/// \endcode\code
+/// [TPCSDK getEligibleTokenRequestorWithCard:card
+///                       publicKeyIdentifier:publicKeyId
+///                                completion:^(NSArray<TokenRequestor *> * _Nullable tokenRequestorList) {
+/// }];
+///
+/// \endcode\param card <code>FundingCard</code> object initialized with <code>CardScheme</code> and Encrypted Payload
+///
+/// \param publicKeyIdentifier Identifier of the key used to encrypt payload
+///
+/// \param tokenRequestors See <code>TokenRequestor</code>
+///
++ (void)getEligibleTokenRequestorWithCard:(FundingCard * _Nonnull)card publicKeyIdentifier:(NSString * _Nonnull)publicKeyIdentifier completion:(void (^ _Nonnull)(NSArray<TokenRequestor *> * _Nullable))completion;
+/// Initiate push provision to scheme
+/// \code
+/// TPCSDK.schemePushProvision(card: card,
+///                            publicKeyIdentifier: publicKeyId,
+///                            authorizationCode: code,
+///                            termsAndConditionsAccepted: true,
+///                            callbackUrl: callbackUrl,
+///                            callbackType: callbackType,
+///                            pushHandler: pushHandler) {
+///   (pushUrl) in
+/// }
+///
+/// \endcode\code
+/// [TPCSDK schemePushProvisionWithCard:card
+///                 publicKeyIdentifier:publicKeyId
+///                   authorizationCode:code
+///          termsAndConditionsAccepted:TRUE
+///                         callbackUrl:callbackUrl
+///                        callbackType:callbackType
+///                         pushHandler:pushHandler
+///                          completion:^(NSString * _Nullable pushUrl) {
+/// }];
+///
+/// \endcode\param card <code>FundingCard</code> object initialized with <code>CardScheme</code> and Encrypted Payload
+///
+/// \param publicKeyIdentifier Identifier of the key used to encrypt payload
+///
+/// \param authorizationCode Authorization code
+///
+/// \param termsAndConditionsAccepted Terms and conditions accepted by user
+///
+/// \param callbackUrl URL used by the token requestor to pass control back to issuer application
+///
+/// \param callbackType ANDROID, IOS, or WEB
+///
+/// \param pushHandler Token requestor push handler
+///
+/// \param pushUrl Token requestor URL used for redirection
+///
++ (void)schemePushProvisionWithCard:(FundingCard * _Nonnull)card publicKeyIdentifier:(NSString * _Nonnull)publicKeyIdentifier authorizationCode:(NSString * _Nonnull)authorizationCode termsAndConditionsAccepted:(BOOL)termsAndConditionsAccepted callbackUrl:(NSString * _Nonnull)callbackUrl callbackType:(NSString * _Nonnull)callbackType pushHandler:(NSString * _Nonnull)pushHandler completion:(void (^ _Nonnull)(NSString * _Nullable))completion;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -656,14 +898,13 @@ SWIFT_PROTOCOL("_TtP11TPCSDKSwift23TPCSDKProvisionDelegate_")
 /// Token for the payment card
 SWIFT_CLASS("_TtC11TPCSDKSwift5Token")
 @interface Token : NSObject
-/// Token ID
-@property (nonatomic, copy) NSString * _Nullable id;
-/// Token state
-@property (nonatomic, copy) NSString * _Nullable state;
-/// Token suffix
-@property (nonatomic, copy) NSString * _Nullable suffix;
-/// Token expiry date
-@property (nonatomic, copy) NSString * _Nullable expiryDate;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
+/// Token Requestor
+SWIFT_CLASS("_TtC11TPCSDKSwift14TokenRequestor")
+@interface TokenRequestor : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -671,10 +912,6 @@ SWIFT_CLASS("_TtC11TPCSDKSwift5Token")
 /// Token requestor asset
 SWIFT_CLASS("_TtC11TPCSDKSwift19TokenRequestorAsset")
 @interface TokenRequestorAsset : NSObject
-/// Type of asset
-@property (nonatomic, copy) NSString * _Nullable type;
-/// Base64 encoded data
-@property (nonatomic, copy) NSString * _Nullable data;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 

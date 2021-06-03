@@ -15,6 +15,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
+        return true
+    }
+    
+    func configureSDK() {
+        
         let tpcIssuerId = "BCOCREPERU"
         let tpcsdkConfigureResult = TPCSDK.configure(variant: .PPROD,
                                                      issuerId: tpcIssuerId)
@@ -28,8 +33,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           print("Apple Pay is not available")
           break
         }
-        
-        return true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

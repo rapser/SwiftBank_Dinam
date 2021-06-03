@@ -24,25 +24,25 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
   // MARK: TPCSDK Configuration
 
   func configureWithVariant() {
-    let tpcVariant = SdkVariant.PROD
+    let tpcVariant = SdkVariant.PPROD
     let tpcIssuerId = "BCOCREPERU"
     let result = TPCSDK.configure(variant: tpcVariant,
                                   issuerId: tpcIssuerId)
-    
-    guard let version = TPCSDK.tpcsdkVersion else {return}
-    
+        
     switch result {
     case .OK:
       print("TPCSDK Configure OK")
-      label.text = "TPCSDK \(version) Configure OK"
+      label.text = "TPCSDK \(TPCSDK.tpcsdkVersion) Configure OK"
       
     case .Fail:
       print("TPCSDK Configure Fail")
-      label.text = "TPCSDK \(version) Configure Fail"
+      label.text = "TPCSDK \(TPCSDK.tpcsdkVersion) Configure Fail"
 
     case .Error:
       print("TPCSDK Configure Error")
-      label.text = "TPCSDK \(version) Configure Fail"
+      label.text = "TPCSDK \(TPCSDK.tpcsdkVersion) Configure Fail"
+    @unknown default:
+        fatalError()
     }
   }
   
@@ -61,6 +61,8 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
       
     case .Error:
       print("TPCSDK Configure Error")
+    @unknown default:
+        fatalError()
     }
   }
   
@@ -185,6 +187,7 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
   func onProvisionCompletion(pass: PKPaymentPass?, error: Error?) {
     if let error = error {
       // TODO: Problem with Provision
+      print(error.localizedDescription)
       return
     }
   }
@@ -235,6 +238,7 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
       (success, error) in
       if let error = error {
         // TODO: Problem with activate
+        print(error.localizedDescription)
         return
       }
     }
@@ -263,13 +267,13 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
   func updateTokenState(tokenId: String, tokenRequestorId: String, scheme: CardScheme, state: TokenState) {
     let code = "code"
     
-//    TPCSDK.updateTokenState(tokenId: tokenId,
-//                            tokenRequestorId: tokenRequestorId,
-//                            scheme: scheme,
-//                            authorizationCode: code,
-//                            action: state) {
-//      (success) in
-//    }
+    TPCSDK.updateTokenState(tokenId: tokenId,
+                            tokenRequestorId: tokenRequestorId,
+                            scheme: scheme,
+                            authorizationCode: code,
+                            action: state) {
+      (success) in
+    }
   }
   
   // MARK: Issuer Linkage
@@ -321,10 +325,10 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
     
     let publicKeyId = "id"
     
-//    TPCSDK.getEligibleTokenRequestor(card: card,
-//                                     publicKeyIdentifier: publicKeyId) {
-//      (TokenRequestorList) in
-//    }
+    TPCSDK.getEligibleTokenRequestor(card: card,
+                                     publicKeyIdentifier: publicKeyId) {
+      (TokenRequestorList) in
+    }
   }
   
   func schemePushProvision() {
@@ -340,14 +344,14 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
     let callbackType = "WEB"
     let pushHandler = "handler"
     
-//    TPCSDK.schemePushProvision(card: card,
-//                               publicKeyIdentifier: publicKeyId,
-//                               authorizationCode: code,
-//                               termsAndConditionsAccepted: true,
-//                               callbackUrl: callbackUrl,
-//                               callbackType: callbackType,
-//                               pushHandler: pushHandler) {
-//      (pushUrl) in
-//    }
+    TPCSDK.schemePushProvision(card: card,
+                               publicKeyIdentifier: publicKeyId,
+                               authorizationCode: code,
+                               termsAndConditionsAccepted: true,
+                               callbackUrl: callbackUrl,
+                               callbackType: callbackType,
+                               pushHandler: pushHandler) {
+      (pushUrl) in
+    }
   }
 }
