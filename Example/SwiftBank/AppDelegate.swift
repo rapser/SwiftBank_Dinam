@@ -6,14 +6,29 @@
 //
 
 import UIKit
+import TPCSDKSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        let tpcIssuerId = "BCOCREPERU"
+        let tpcsdkConfigureResult = TPCSDK.configure(variant: .PPROD,
+                                                     issuerId: tpcIssuerId)
+        switch tpcsdkConfigureResult {
+        case .OK:
+          print("Apple Pay and provisioning is supported")
+          break
+        case .Error:
+          print("Ha sucedido un error con Apple Pay")
+        default:
+          print("Apple Pay is not available")
+          break
+        }
+        
         return true
     }
 

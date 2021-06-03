@@ -16,7 +16,7 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    // Do any additional setup after loading the view.
+
     configureWithVariant()
     
   }
@@ -25,7 +25,7 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
 
   func configureWithVariant() {
     let tpcVariant = SdkVariant.PROD
-    let tpcIssuerId = "TPCSANDBOX"
+    let tpcIssuerId = "BCOCREPERU"
     let result = TPCSDK.configure(variant: tpcVariant,
                                   issuerId: tpcIssuerId)
     
@@ -260,7 +260,7 @@ class ViewController: UIViewController, TPCSDKProvisionDelegate {
     }
   }
   
-    func updateTokenState(tokenId: String, tokenRequestorId: String, scheme: CardScheme, state: TokenState) {
+  func updateTokenState(tokenId: String, tokenRequestorId: String, scheme: CardScheme, state: TokenState) {
     let code = "code"
     
 //    TPCSDK.updateTokenState(tokenId: tokenId,
