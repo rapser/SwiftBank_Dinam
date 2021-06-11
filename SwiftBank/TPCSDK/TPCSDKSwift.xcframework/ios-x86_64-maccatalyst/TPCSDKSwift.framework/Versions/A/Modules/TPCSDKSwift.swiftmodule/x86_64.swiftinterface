@@ -1,6 +1,6 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 5.1 (swiftlang-1100.0.270.13 clang-1100.0.33.7)
-// swift-module-flags: -target x86_64-apple-ios13.0-macabi -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name TPCSDKSwift
+// swift-module-flags: -target x86_64-apple-ios13.0-macabi -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -module-name TPCSDKSwift
 import Foundation
 import PassKit
 import Security
@@ -184,7 +184,7 @@ public struct Device : Swift.Codable {
   @objc func onProvisionCompletion(pass: PassKit.PKPaymentPass?, error: Swift.Error?)
 }
 @objc @objcMembers final public class TPCSDK : ObjectiveC.NSObject {
-  @objc public static let tpcsdkVersion: Swift.String
+  @objc public static var tpcsdkVersion: Swift.String
   @objc public static func reset()
   @objc public static func configure(variant: TPCSDKSwift.SdkVariant, issuerId: Swift.String) -> TPCSDKSwift.SdkConfigureResult
   @objc public static func configure(url: Swift.String, issuerId: Swift.String) -> TPCSDKSwift.SdkConfigureResult
@@ -204,21 +204,3 @@ public struct Device : Swift.Codable {
   @objc override dynamic public init()
   @objc deinit
 }
-extension TPCSDKSwift.SdkVariant : Swift.Equatable {}
-extension TPCSDKSwift.SdkVariant : Swift.Hashable {}
-extension TPCSDKSwift.SdkVariant : Swift.RawRepresentable {}
-extension TPCSDKSwift.SdkConfigureResult : Swift.Equatable {}
-extension TPCSDKSwift.SdkConfigureResult : Swift.Hashable {}
-extension TPCSDKSwift.SdkConfigureResult : Swift.RawRepresentable {}
-extension TPCSDKSwift.IsCardDigitizedResult : Swift.Equatable {}
-extension TPCSDKSwift.IsCardDigitizedResult : Swift.Hashable {}
-extension TPCSDKSwift.IsCardDigitizedResult : Swift.RawRepresentable {}
-extension TPCSDKSwift.CardScheme : Swift.Equatable {}
-extension TPCSDKSwift.CardScheme : Swift.Hashable {}
-extension TPCSDKSwift.CardScheme : Swift.RawRepresentable {}
-extension TPCSDKSwift.TokenState : Swift.Equatable {}
-extension TPCSDKSwift.TokenState : Swift.Hashable {}
-extension TPCSDKSwift.TokenState : Swift.RawRepresentable {}
-extension TPCSDKSwift.CardAssetSize : Swift.Equatable {}
-extension TPCSDKSwift.CardAssetSize : Swift.Hashable {}
-extension TPCSDKSwift.CardAssetSize : Swift.RawRepresentable {}
